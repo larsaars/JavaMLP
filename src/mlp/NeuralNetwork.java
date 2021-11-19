@@ -136,6 +136,7 @@ public class NeuralNetwork implements Serializable {
         // expected minus wished output
         Matrix errorBefore = Matrix.fromArray(Y)
                 .subtract(processing[processing.length - 1]);
+
         double loss = errorBefore.r2error();
 
         for (int i = layers.length - 2; i >= 0; i--) {

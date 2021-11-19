@@ -15,16 +15,20 @@ import java.util.Arrays;
  * with a ratio of 80:20 for example.
  */
 public class PatternRecognitionTestUse {
+
+    private static final char[] PATTERNS =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+            .toCharArray();
+
     public static void main(String[] args) {
         // load network
         NeuralNetwork nn = NNUtils.load();
-        nn.printNetwork();
 
         // load image and classify
         double[] image = PatternRecognitionTestTrain.loadImage("img/16.png", 28, 28, false);
         double[] output = nn.predict(image);
 
         Log.l(Arrays.toString(output));
-        Log.l(ArrayUtils.argMax(output));
+        Log.l(PATTERNS[ArrayUtils.argMax(output)]);
     }
 }
