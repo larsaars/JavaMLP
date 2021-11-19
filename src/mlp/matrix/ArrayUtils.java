@@ -1,7 +1,5 @@
 package mlp.matrix;
 
-import org.jetbrains.annotations.Contract;
-
 import java.util.List;
 
 public class ArrayUtils {
