@@ -1,3 +1,5 @@
+package test;
+
 import mlp.utils.NNUtils;
 import mlp.NeuralNetwork;
 import mlp.activationfunction.ActivationFunctions;

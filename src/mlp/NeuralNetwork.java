@@ -2,6 +2,7 @@ package mlp;
 
 import mlp.activationfunction.ActivationFunction;
 import mlp.matrix.Matrix;
+import mlp.utils.Log;
 import mlp.utils.Serializer;
 
 import java.io.Serializable;
@@ -105,6 +106,8 @@ public class NeuralNetwork implements Serializable {
                 epochsUnderMinLoss = 0;
 
             epochs++;
+
+            Log.l("epochs: " + epochs + " loss: " + currentLoss);
         } while (epochsUnderMinLoss < forAtLeastN && (maxEpochs == -1 || epochs < maxEpochs));
 
         double[] lossArr = new double[loss.size()];

@@ -189,7 +189,7 @@ public class Matrix implements Serializable {
         return verifyDouble(a + b);
     }
 
-    private static double verifyDouble(double o) {
+    /*private static double verifyDouble(double o) {
         if(Double.isNaN(o))
             return 0.;
         else if(o == Double.POSITIVE_INFINITY)
@@ -198,6 +198,10 @@ public class Matrix implements Serializable {
             return -ABSURDLY_LARGE;
         else
             return o;
+    } */
+
+    private static double verifyDouble(double o) {
+        return o != o || Double.isInfinite(o) ? 0. : o;
     }
 
     /*
