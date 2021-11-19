@@ -5,7 +5,9 @@ import mlp.matrix.ArrayUtils;
 import mlp.utils.Log;
 import mlp.utils.NNUtils;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * "testing" the pattern recognition system
@@ -25,10 +27,11 @@ public class PatternRecognitionTestUse {
         NeuralNetwork nn = NNUtils.load();
 
         // load image and classify
-        double[] image = PatternRecognitionTestTrain.loadImage("img/16.png", 28, 28, false);
-        double[] output = nn.predict(image);
+        for (File testFile : Objects.requireNonNull(new File("img/test").listFiles())) {
+            double[] image = PatternRecognitionTestTrain.loadImage(testFile.getPath(), 28, 28, false);
+            double[] output = nn.predict(image);
 
-        Log.l(Arrays.toString(output));
-        Log.l(PATTERNS[ArrayUtils.argMax(output)]);
+            Log.l(testFile.getName() + ": " + PATTERNS[ArrayUtils.argMax(output)]);
+        }
     }
 }

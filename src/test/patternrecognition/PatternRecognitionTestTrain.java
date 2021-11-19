@@ -21,8 +21,8 @@ public class PatternRecognitionTestTrain {
 
     public static void main(String[] args) {
         // load the training data
-        List<Double[]> X = new ArrayList<>(),
-                Y = new ArrayList<>();
+        List<Double[]> X_list = new ArrayList<>(),
+                Y_list = new ArrayList<>();
 
         // folders with patterns and samples
         for (int i = 1; i <= 62; i++) {
@@ -32,20 +32,23 @@ public class PatternRecognitionTestTrain {
                 Double[] y = ArrayUtils.toObject(ArrayUtils.oneHotEncoding(62, i - 1));
                 Double[] x = ArrayUtils.toObject(image);
 
-                X.add(x);
-                Y.add(y);
+                X_list.add(x);
+                Y_list.add(y);
             }
 
             l("Loaded " + i + " pattern folders");
         }
 
+        double [][] X = ArrayUtils.fromList(X_list),
+                Y = ArrayUtils.fromList(Y_list);
+
         // create the nn instance
-        NeuralNetwork nn = new NeuralNetwork(new int[]{784, 128, 128, 128, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
+       NeuralNetwork nn = new NeuralNetwork(new int[]{784, 70, 70, 70, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
         // fit data and save loss and model
         double[] loss = nn.fit(
-                ArrayUtils.fromList(X),
-                ArrayUtils.fromList(Y),
-                50000
+                X,
+                Y,
+                550000
         );
 
         l("saving nn and loss");
