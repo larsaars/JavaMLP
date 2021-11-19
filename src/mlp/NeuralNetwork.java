@@ -14,7 +14,7 @@ import java.util.Random;
 public class NeuralNetwork implements Serializable {
 
     public Matrix[] weights, biases;
-    public ActivationFunction[] activationFunctions;
+   public ActivationFunction activationFunction;
     public int[] layers;
 
     public double learningRate;
@@ -29,10 +29,9 @@ public class NeuralNetwork implements Serializable {
 
         weights = new Matrix[layersSize - 1];
         biases = new Matrix[layersSize - 1];
-        activationFunctions = new ActivationFunction[layersSize - 1];
+        this.activationFunction = activationFunction;
 
         for (int i = 0; i < layersSize - 1; i++) {
-            activationFunctions[i] = activationFunction;
             weights[i] = new Matrix(layers[i + 1], layers[i], true);
             biases[i] = new Matrix(layers[i + 1], 1, true);
         }
@@ -59,7 +58,7 @@ public class NeuralNetwork implements Serializable {
         for (int i = 0; i < weights.length; i++)
             input = Matrix.dot(weights[i], input)
                     .add(biases[i])
-                    .apply(activationFunctions[i], false);
+                    .apply(activationFunction, false);
 
         return input.toArray();
     }
@@ -77,6 +76,7 @@ public class NeuralNetwork implements Serializable {
         for (int i = 0; i < epochs; i++) {
             int sampleN = random.nextInt(X.length);
             loss[i] = backprop(X[sampleN], Y[sampleN]);
+            Log.l("epochs: " + (i + 1) + " loss: " + loss[i]);
         }
 
         return loss;
@@ -130,19 +130,19 @@ public class NeuralNetwork implements Serializable {
         for(int i = 0; i < processing.length - 1; i++)
             processing[i + 1] = Matrix.dot(weights[i], processing[i])
                     .add(biases[i])
-                    .apply(activationFunctions[i], false);
+                    .apply(activationFunction, false);
 
         Matrix inputWeightsBefore = Matrix.fromArray(X);
         // expected minus wished output
         Matrix errorBefore = Matrix.fromArray(Y)
                 .subtract(processing[processing.length - 1]);
-        double loss = errorBefore.l2norm();
+        double loss = errorBefore.r2error();
 
         for (int i = layers.length - 2; i >= 0; i--) {
             Matrix error = i == layers.length - 2 ? errorBefore : Matrix.dot(inputWeightsBefore, errorBefore);
 
             Matrix gradient = Matrix.c(processing[i + 1])
-                    .apply(activationFunctions[i], true)
+                    .apply(activationFunction, true)
                     .multiply(error)
                     .multiply(learningRate);
 

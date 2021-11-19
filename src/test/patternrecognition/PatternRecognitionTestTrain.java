@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static mlp.utils.Log.*;
@@ -39,14 +40,12 @@ public class PatternRecognitionTestTrain {
         }
 
         // create the nn instance
-        NeuralNetwork nn = new NeuralNetwork(new int[]{784, 16, 16, 16, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
+        NeuralNetwork nn = new NeuralNetwork(new int[]{784, 128, 128, 128, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
         // fit data and save loss and model
         double[] loss = nn.fit(
                 ArrayUtils.fromList(X),
                 ArrayUtils.fromList(Y),
-                0.01,
-                20,
-                1000000
+                50000
         );
 
         l("saving nn and loss");

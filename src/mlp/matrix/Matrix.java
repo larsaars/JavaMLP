@@ -126,6 +126,20 @@ public class Matrix implements Serializable {
         return Math.sqrt(sum);
     }
 
+    public double l1norm() {
+        double sum = 0;
+        for (int i = 0; i < rows; i++)
+            for (int j = 0; j < cols; j++)
+                sum += Math.abs(data[i][j]);
+
+        return sum;
+    }
+
+    public double r2error() {
+        return l2norm() / (rows * cols);
+    }
+
+
     /*
      * copy a matrix
      */
@@ -189,7 +203,7 @@ public class Matrix implements Serializable {
         return verifyDouble(a + b);
     }
 
-    /*private static double verifyDouble(double o) {
+    private static double verifyDouble(double o) {
         if(Double.isNaN(o))
             return 0.;
         else if(o == Double.POSITIVE_INFINITY)
@@ -198,9 +212,9 @@ public class Matrix implements Serializable {
             return -ABSURDLY_LARGE;
         else
             return o;
-    } */
+    }
 
-    private static double verifyDouble(double o) {
+    private static double verifyDouble2(double o) {
         return o != o || Double.isInfinite(o) ? 0. : o;
     }
 

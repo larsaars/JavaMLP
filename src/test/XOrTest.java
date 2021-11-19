@@ -19,9 +19,9 @@ public class XOrTest {
     };
 
     public static void main(String[] args) {
-        NeuralNetwork nn = new NeuralNetwork(new int[]{2, 16, 16, 1}, 1e-3, ActivationFunctions.RELU);
+        NeuralNetwork nn = new NeuralNetwork(new int[]{2, 16, 16, 16, 16, 16, 1}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
 
-        double[] loss = nn.fit(X, Y, 0.01, 20, 1000000);
+        double[] loss = nn.fit(X, Y, 1e-2, 20, 1000000);
         for (double[] d : X) {
             double[] output = nn.predict(d);
             System.out.println(Arrays.toString(output));
