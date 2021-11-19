@@ -48,7 +48,7 @@ public class PatternRecognitionTestTrain {
         double[] loss = nn.fit(
                 X,
                 Y,
-                550000
+                5000000
         );
 
         l("saving nn and loss");

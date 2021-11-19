@@ -26,6 +26,8 @@ public class PatternRecognitionTestUse {
         // load network
         NeuralNetwork nn = NNUtils.load();
 
+        nn.printNetwork();
+
         // load image and classify
         for (File testFile : Objects.requireNonNull(new File("img/test").listFiles())) {
             double[] image = PatternRecognitionTestTrain.loadImage(testFile.getPath(), 28, 28, false);
