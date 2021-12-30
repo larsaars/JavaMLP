@@ -24,5 +24,6 @@ hs_err_pid*
 
 # python
 .ipynb_cache/
+.ipynb_checkpoints/
 __pycache__/
 /out/
