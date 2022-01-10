@@ -86,29 +86,28 @@ public class NeuralNetwork implements Serializable {
      * train until loss is under specific loss for at least n epochs (stochastic gradient descent)
      * @param X array of input samples
      * @param Y array of expected targets
-     * @param minLoss minimum loss to stop training
-     * @param forAtLeastN epochs
-     * @param maxEpochs maximum epochs (put -1 for infinite)
+     * @param lossTolerance loss tolerance
+     * @param maxEpochs max number of epochs
      * @return loss
      */
-    public double[] fit(double[][] X, double[][] Y, double minLoss, int forAtLeastN, int maxEpochs) {
+    public double[] fit(double[][] X, double[][] Y, double lossTolerance, int maxEpochs) {
         List<Double> loss = new ArrayList<>();
 
-        int epochsUnderMinLoss = 0, epochs = 0;
+        int epochs = 0;
+        double lastLoss = Double.MAX_VALUE;
         do {
             int sampleN = random.nextInt(X.length);
             double currentLoss = backprop(X[sampleN], Y[sampleN]);
             loss.add(currentLoss);
 
-            if (currentLoss <= minLoss)
-                epochsUnderMinLoss++;
-            else
-                epochsUnderMinLoss = 0;
+            if (Math.abs(lastLoss - currentLoss) < lossTolerance)
+                break;
 
+            lastLoss = currentLoss;
             epochs++;
 
             Log.l("epochs: " + epochs + " loss: " + currentLoss);
-        } while (epochsUnderMinLoss < forAtLeastN && (maxEpochs == -1 || epochs < maxEpochs));
+        } while (maxEpochs == -1 || epochs < maxEpochs);
 
         double[] lossArr = new double[loss.size()];
         for(int i = 0; i < loss.size(); i++)
@@ -123,6 +122,7 @@ public class NeuralNetwork implements Serializable {
      * @param Y array of target class
      * @return loss of the function
      */
+    // TODO implement minibatches
     private double backprop(double[] X, double[] Y) {
         Matrix[] processing = new Matrix[layers.length];
         processing[0] = Matrix.fromArray(X);
