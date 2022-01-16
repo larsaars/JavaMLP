@@ -1,6 +1,6 @@
 package mlp.utils;
 
-import mlp.NeuralNetwork;
+import mlp.MLP;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,13 +11,13 @@ public class NNUtils {
     private static final String DEFAULT_LOSS_FILE_NAME = "loss.txt",
             DEFAULT_NN_FILE_NAME = "nn.ser";
 
-    public static void save(NeuralNetwork nn, double[] loss) {
+    public static void save(MLP nn, double[] loss) {
         Serializer.serialize(nn, DEFAULT_NN_FILE_NAME);
         writeLossToFile(loss, DEFAULT_LOSS_FILE_NAME);
     }
     
-    public static NeuralNetwork load() {
-        return NeuralNetwork.load(DEFAULT_NN_FILE_NAME);
+    public static MLP load() {
+        return MLP.load(DEFAULT_NN_FILE_NAME);
     }
     
     public static void writeLossToFile(double[] loss, String fileName) {

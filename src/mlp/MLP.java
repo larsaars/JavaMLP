@@ -11,25 +11,57 @@ import java.util.List;
 import java.util.Random;
 
 
-public class NeuralNetwork implements Serializable {
+/**
+ * MLP - short for 'Multi Layer Perceptron'
+ * or also called Vanilla Neural Network
+ */
+public class MLP implements Serializable {
 
+    /**
+     * the layer structure:
+     * weight matrices are used
+     * each row is one neuron of the layer, with one belonging weight column vector (n x 1 matrix)
+     * m - number of columns (number of input neurons)
+     * n - number of rows (number of output neurons)
+     * when taking the dot product with a column input vector, another column vector is calculated
+     * with length of n - output of the layer:
+     * n x m * n x 1 = n x 1
+     * the result of this is passed through the activationFunction (item-wise)
+     * in backprop, this whole process is done with the part-derivatives and the chain rule the other way
+     * round than when forward propagating.
+     */
     public Matrix[] weights, biases;
-   public ActivationFunction activationFunction;
+
+    /**
+     * activation function for all layers
+     */
+    public ActivationFunction activationFunction;
+    /**
+     * the layer structure
+     * (count of how many neurons are in the end in every layer)
+     */
     public int[] layers;
 
+    /**
+     * the learning rate - backprop hyperparameter
+     */
     public double learningRate;
 
+    /**
+     * instance of random class
+     */
     private final Random random = new Random();
 
 
-    public NeuralNetwork(int[] layers, double learningRate, ActivationFunction activationFunction) {
+    public MLP(int[] layers, double learningRate, ActivationFunction activationFunction) {
         this.learningRate = learningRate;
         this.layers = layers;
+        this.activationFunction = activationFunction;
+
         int layersSize = layers.length;
 
         weights = new Matrix[layersSize - 1];
         biases = new Matrix[layersSize - 1];
-        this.activationFunction = activationFunction;
 
         for (int i = 0; i < layersSize - 1; i++) {
             weights[i] = new Matrix(layers[i + 1], layers[i], true);
@@ -39,35 +71,39 @@ public class NeuralNetwork implements Serializable {
 
     /**
      * load neural network from file
+     *
      * @param file path to file
      * @return neural network
      */
-    public static NeuralNetwork load(String file) {
-        return (NeuralNetwork) Serializer.deserialize(file);
+    public static MLP load(String file) {
+        return (MLP) Serializer.deserialize(file);
     }
 
 
     /**
      * feed forward
+     *
      * @param X input
      * @return output of last layer
      */
     public double[] predict(double[] X) {
-        Matrix input = Matrix.fromArray(X);
+        Matrix input = Matrix
+                .columnVector(X);
 
         for (int i = 0; i < weights.length; i++)
             input = Matrix.dot(weights[i], input)
                     .add(biases[i])
                     .apply(activationFunction, false);
 
-        return input.toArray();
+        return input.flatten();
     }
 
 
     /**
      * train in n epochs with stochastic gradient descent
-     * @param X array of input samples
-     * @param Y array of expected targets
+     *
+     * @param X      array of input samples
+     * @param Y      array of expected targets
      * @param epochs number of epochs
      * @return loss
      */
@@ -84,10 +120,11 @@ public class NeuralNetwork implements Serializable {
 
     /**
      * train until loss is under specific loss for at least n epochs (stochastic gradient descent)
-     * @param X array of input samples
-     * @param Y array of expected targets
+     *
+     * @param X             array of input samples
+     * @param Y             array of expected targets
      * @param lossTolerance loss tolerance
-     * @param maxEpochs max number of epochs
+     * @param maxEpochs     max number of epochs
      * @return loss
      */
     public double[] fit(double[][] X, double[][] Y, double lossTolerance, int maxEpochs) {
@@ -110,7 +147,7 @@ public class NeuralNetwork implements Serializable {
         } while (maxEpochs == -1 || epochs < maxEpochs);
 
         double[] lossArr = new double[loss.size()];
-        for(int i = 0; i < loss.size(); i++)
+        for (int i = 0; i < loss.size(); i++)
             lossArr[i] = loss.get(i);
 
         return lossArr;
@@ -118,36 +155,39 @@ public class NeuralNetwork implements Serializable {
 
     /**
      * backpropagation
+     *
      * @param X array of input samples
      * @param Y array of target class
      * @return loss of the function
      */
-    // TODO implement minibatches
-    private double backprop(double[] X, double[] Y) {
-        Matrix[] processing = new Matrix[layers.length];
-        processing[0] = Matrix.fromArray(X);
 
-        for(int i = 0; i < processing.length - 1; i++)
-            processing[i + 1] = Matrix.dot(weights[i], processing[i])
+    // TODO how to minibatch
+    // TODO and how to use augmented weight vector
+    private double backprop(double[] X, double[] Y) {
+        Matrix[] feedforward = new Matrix[layers.length];
+        feedforward[0] = Matrix.columnVector(X);
+
+        for (int i = 0; i < feedforward.length - 1; i++)
+            feedforward[i + 1] = Matrix.dot(weights[i], feedforward[i])
                     .add(biases[i])
                     .apply(activationFunction, false);
 
-        Matrix inputWeightsBefore = Matrix.fromArray(X);
+        Matrix inputWeightsBefore = Matrix.columnVector(X);
         // expected minus wished output
-        Matrix errorBefore = Matrix.fromArray(Y)
-                .subtract(processing[processing.length - 1]);
+        Matrix errorBefore = Matrix.columnVector(Y)
+                .subtract(feedforward[feedforward.length - 1]);
 
         double loss = errorBefore.r2error();
 
         for (int i = layers.length - 2; i >= 0; i--) {
             Matrix error = i == layers.length - 2 ? errorBefore : Matrix.dot(inputWeightsBefore, errorBefore);
 
-            Matrix gradient = Matrix.c(processing[i + 1])
+            Matrix gradient = Matrix.c(feedforward[i + 1])
                     .apply(activationFunction, true)
                     .multiply(error)
                     .multiply(learningRate);
 
-            Matrix l_T = Matrix.transpose(processing[i]);
+            Matrix l_T = Matrix.transpose(feedforward[i]);
             Matrix l_delta = Matrix.dot(gradient, l_T);
 
             weights[i].add(l_delta);

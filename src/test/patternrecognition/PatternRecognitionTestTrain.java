@@ -1,6 +1,6 @@
 package test.patternrecognition;
 
-import mlp.NeuralNetwork;
+import mlp.MLP;
 import mlp.activationfunction.ActivationFunctions;
 import mlp.matrix.ArrayUtils;
 import mlp.utils.NNUtils;
@@ -11,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static mlp.utils.Log.*;
@@ -43,7 +42,7 @@ public class PatternRecognitionTestTrain {
                 Y = ArrayUtils.fromList(Y_list);
 
         // create the nn instance
-       NeuralNetwork nn = new NeuralNetwork(new int[]{784, 70, 70, 70, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
+       MLP nn = new MLP(new int[]{784, 70, 70, 70, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
         // fit data and save loss and model
         double[] loss = nn.fit(
                 X,

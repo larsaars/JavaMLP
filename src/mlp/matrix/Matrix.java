@@ -38,11 +38,41 @@ public class Matrix implements Serializable {
         this.data = data;
     }
 
+    public Matrix expandByColumn(int index, double filler) {
+        Matrix m = new Matrix(rows, cols + 1);
+
+        for (int i = 0; i < m.rows; i++) {
+            for (int j = 0; j < m.cols; j++) {
+                if (j == index)
+                    m.data[i][j] = filler;
+                else
+                    m.data[i][j] = data[i][j > index ? j - 1 : j];
+            }
+        }
+
+        return m;
+    }
+
+    public Matrix expandByRow(int index, double filler) {
+        Matrix m = new Matrix(rows + 1, cols);
+
+        for (int i = 0; i < m.rows; i++) {
+            for (int j = 0; j < m.cols; j++) {
+                if (i == index)
+                    m.data[i][j] = filler;
+                else
+                    m.data[i][j] = data[i > index ? i - 1: i][j];
+            }
+        }
+
+        return m;
+    }
+
     public Matrix add(double scalar) {
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
                 data[i][j] = validAddition(data[i][j], scalar);
-                // data[i][j] += scalar;
+        // data[i][j] += scalar;
 
         return this;
     }
@@ -55,7 +85,7 @@ public class Matrix implements Serializable {
         for (int i = 0; i < rows; i++)
             for (int j = 0; j < cols; j++)
                 data[i][j] = validAddition(data[i][j], m.data[i][j]);
-                // data[i][j] += m.data[i][j];
+        // data[i][j] += m.data[i][j];
 
         return this;
     }
@@ -204,11 +234,11 @@ public class Matrix implements Serializable {
     }
 
     private static double verifyDouble(double o) {
-        if(Double.isNaN(o))
+        if (Double.isNaN(o))
             return 0.;
-        else if(o == Double.POSITIVE_INFINITY)
+        else if (o == Double.POSITIVE_INFINITY)
             return ABSURDLY_LARGE;
-        else if(o == Double.NEGATIVE_INFINITY)
+        else if (o == Double.NEGATIVE_INFINITY)
             return -ABSURDLY_LARGE;
         else
             return o;
@@ -218,22 +248,23 @@ public class Matrix implements Serializable {
         return o != o || Double.isInfinite(o) ? 0. : o;
     }
 
-    /*
+    /**
      * functions for creating from array
      */
-    public static Matrix fromArray(double[] x) {
-        Matrix temp = new Matrix(x.length, 1);
-        for (int i = 0; i < x.length; i++)
-            temp.data[i][0] = x[i];
-        return temp;
+    public static Matrix columnVector(double[] a) {
+        Matrix m = new Matrix(a.length, 1);
 
+        for (int i = 0; i < a.length; i++)
+            m.data[i][0] = a[i];
+
+        return m;
     }
 
-    public double[] toArray() {
+    public double[] flatten() {
         return ArrayUtils.flatten(data);
     }
 
-    /*
+    /**
      * helpful utility functions
      */
     @Override

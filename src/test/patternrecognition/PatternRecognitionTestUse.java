@@ -1,12 +1,11 @@
 package test.patternrecognition;
 
-import mlp.NeuralNetwork;
+import mlp.MLP;
 import mlp.matrix.ArrayUtils;
 import mlp.utils.Log;
 import mlp.utils.NNUtils;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -24,7 +23,7 @@ public class PatternRecognitionTestUse {
 
     public static void main(String[] args) {
         // load network
-        NeuralNetwork nn = NNUtils.load();
+        MLP nn = NNUtils.load();
 
         nn.printNetwork();
 
