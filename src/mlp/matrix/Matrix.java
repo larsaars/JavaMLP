@@ -177,6 +177,10 @@ public class Matrix implements Serializable {
         return new Matrix(m);
     }
 
+    public static Matrix random(int rows, int cols) {
+        return new Matrix(rows, cols, true);
+    }
+
 
     /*
      * static matrix options return copies
