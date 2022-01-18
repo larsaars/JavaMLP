@@ -21,10 +21,8 @@ public class XOrTest {
     public static void main(String[] args) {
         MLP nn = new MLP(new int[]{2, 16, 16, 16, 16, 16, 1}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
 
-        double[] loss = nn.fit(X, Y, 1e-6, 10000);
-        for (double[] d : new double[][]{
-                {1, 1},
-        }) {
+        double[] loss = nn.fit(X, Y, 10000);
+        for (var d : X) {
             double[] output = nn.predict(d);
             System.out.println(Arrays.toString(output));
         }

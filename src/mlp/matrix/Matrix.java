@@ -61,7 +61,7 @@ public class Matrix implements Serializable {
                 if (i == index)
                     m.data[i][j] = filler;
                 else
-                    m.data[i][j] = data[i > index ? i - 1: i][j];
+                    m.data[i][j] = data[i > index ? i - 1 : i][j];
             }
         }
 
@@ -108,6 +108,17 @@ public class Matrix implements Serializable {
             for (int j = 0; j < cols; j++)
                 // data[i][j] *= scalar;
                 data[i][j] = validMultiply(data[i][j], scalar);
+
+        return this;
+    }
+
+    public Matrix multiplyExceptColumn(double scalar, int index) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (j == index) continue;
+                data[i][j] = validMultiply(data[i][j], scalar);
+            }
+        }
 
         return this;
     }
@@ -170,22 +181,34 @@ public class Matrix implements Serializable {
     }
 
 
-    /*
-     * copy a matrix
+    /**
+     * @return copy of matrix
      */
     public static Matrix c(Matrix m) {
         return new Matrix(m);
     }
 
+    /**
+     * @return random matrix with values between -1 and 1
+     */
     public static Matrix random(int rows, int cols) {
         return new Matrix(rows, cols, true);
     }
 
-
-    /*
-     * static matrix options return copies
+    /**
+     * @return return empty matrix with zeros as filler
      */
+    public static Matrix zeros(int rows, int cols) {
+        return new Matrix(rows, cols);
+    }
 
+
+    /**
+     * transpose a matrix
+     *
+     * @param m matrix to transpose
+     * @return transposed matrix (a copy)
+     */
     public static Matrix transpose(Matrix m) {
         Matrix temp = new Matrix(m.cols, m.rows);
         for (int i = 0; i < m.rows; i++)
@@ -195,6 +218,13 @@ public class Matrix implements Serializable {
         return temp;
     }
 
+    /**
+     * matrix multiplication
+     *
+     * @param a left matrix
+     * @param b right matrix
+     * @return a matmul b
+     */
     public static Matrix dot(Matrix a, Matrix b) {
         if (a.cols != b.rows)
             throw new ShapeMismatchException("dot shape mismatch: %s and %s\n", a.shapeString(), b.shapeString());
@@ -226,7 +256,7 @@ public class Matrix implements Serializable {
                 data[i][j] = Math.random() * 2. - 1.;
     }
 
-    /*
+    /**
      * this is needed to be sure that the result of all mathematical operations is a valid double
      */
     private static double validMultiply(double a, double b) {

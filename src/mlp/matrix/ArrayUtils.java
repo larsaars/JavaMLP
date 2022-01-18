@@ -1,8 +1,14 @@
 package mlp.matrix;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class ArrayUtils {
+
+    public static final Random random = new Random();
+
     public static double[] flatten(double[][] array) {
         double[] flat = new double[array.length * array[0].length];
         for (int i = 0; i < array.length; i++)
@@ -59,4 +65,43 @@ public class ArrayUtils {
             if (array[i] < array[min]) min = i;
         return min;
     }
+
+    /**
+     * shuffle multiple arrays in the same manner
+     * https://stackoverflow.com/a/19333201/5899585
+     */
+    public static <T> void shuffle(T[]... arrays) {
+        int countOfArrays = arrays[0].length;
+        for (int i = 1; i < arrays.length ; i++) {
+            if(arrays[i].length != countOfArrays)
+                throw new IllegalArgumentException("All arrays must have the same length");
+        }
+
+
+        int count = arrays[0].length;
+        for (int i = count; i > 1; i--) {
+            int swapIdx = random.nextInt(i);
+
+            for (T[] array : arrays)
+                swap(array, i - 1, swapIdx);
+        }
+    }
+
+    /**
+     * swap two array elements
+     */
+    public static <T> void swap(T[] array, int i, int j) {
+        T temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
+
+    /**
+     * @return last element of array
+     */
+    public static <T> T lastElement(T[] array) {
+        return array[array.length - 1];
+    }
 }
+

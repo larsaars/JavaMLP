@@ -3,6 +3,8 @@ package test;
 import mlp.MLP;
 import mlp.MLP2;
 import mlp.activationfunction.ActivationFunctions;
+import mlp.matrix.ArrayUtils;
+import mlp.utils.Log;
 import mlp.utils.NNUtils;
 
 import java.util.Arrays;
@@ -20,16 +22,16 @@ public class XOrTest2 {
     };
 
     public static void main(String[] args) {
-        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 16, 1}, ActivationFunctions.SIGMOID, 1e-4);
+        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 16, 1}, ActivationFunctions.SIGMOID, 1e-3);
 
-        double[] loss = nn.fit(X, Y, 1e-6, 10000);
-        for (double[] d : new double[][]{
-                {1, 1},
-        }) {
-            double[] output = nn.predict(d);
-            System.out.println(Arrays.toString(output));
+        double[] loss = nn.fit(X, Y, 4, 100);
+        for (double[] d : X) {
+            double[] output = nn.feedForward(d);
+            System.out.println("Output: " + Arrays.toString(output));
         }
 
-        NNUtils.save(nn, loss);
+        Log.l("Loss: " + Arrays.toString(loss));
+
+        // NNUtils.save(nn, loss);
     }
 }
