@@ -3,6 +3,7 @@ package mlp;
 import mlp.activationfunction.ActivationFunction;
 import mlp.matrix.ArrayUtils;
 import mlp.matrix.Matrix;
+import mlp.utils.Log;
 import mlp.utils.Pair;
 
 import java.io.Serializable;
@@ -13,9 +14,10 @@ import java.util.List;
 public class MLP2 implements Serializable {
     /**
      * thetas, weight matrices
-     * augmented weight vectors are used
+     * bias vectors are not included in the weights,
+     * using extra vector, easier to calculate
      */
-    public Matrix[] weights;
+    public Matrix[] weight, bias;
 
     /**
      * activation function for all layers
@@ -29,9 +31,10 @@ public class MLP2 implements Serializable {
     public int[] layerStructure;
 
     /**
-     * hyperparameter learning rate eta
+     * hyperparameter learning rate eta for weights
+     * and for bias (gamma)
      */
-    public double learningRate;
+    public double learningRate, biasLearningRate;
 
     /**
      * initializer
@@ -40,17 +43,20 @@ public class MLP2 implements Serializable {
      * @param activationFunction activation function
      * @param learningRate       learning rate
      */
-    public MLP2(int[] layerStructure, ActivationFunction activationFunction, double learningRate) {
+    public MLP2(int[] layerStructure, ActivationFunction activationFunction, double learningRate, double biasLearningRate) {
         this.learningRate = learningRate;
+        this.biasLearningRate = biasLearningRate;
         this.layerStructure = layerStructure;
         this.activationFunction = activationFunction;
 
-        // initialize weights
-        weights = new Matrix[layerStructure.length - 1];
+        // initialize weights and biases structure
+        weight = new Matrix[layerStructure.length - 1];
+        bias = new Matrix[layerStructure.length - 1];
 
-        for (int i = 0; i < weights.length; i++)
-            // one column more for bias
-            weights[i] = Matrix.random(layerStructure[i + 1], layerStructure[i] + 1);
+        for (int i = 0; i < weight.length; i++) {
+            weight[i] = Matrix.random(layerStructure[i + 1], layerStructure[i]);
+            bias[i] = Matrix.random(layerStructure[i + 1], 1);
+        }
     }
 
     /**
@@ -71,8 +77,8 @@ public class MLP2 implements Serializable {
 
         // calculate zs and activations
         // the first z is Z 2
-        for (int i = 0; i < z.length - 1; i++) {
-            z[i] = Matrix.dot(weights[i], a[i]);
+        for (int i = 0; i < z.length; i++) {
+            z[i] = Matrix.dot(weight[i], a[i]).add(bias[i]);
             a[i + 1] = Matrix.c(z[i]).apply(activationFunction, false);
         }
 
@@ -140,56 +146,66 @@ public class MLP2 implements Serializable {
     /**
      * train one epoch
      *
-     * @param inputs  column vectors of inputs
-     * @param outputs column vectors of outputs
+     * @param X column vectors of inputs
+     * @param Y column vectors of outputs
      * @return loss
      */
-    public double fit(Matrix[] inputs, Matrix[] outputs) {
-        if (inputs.length != outputs.length)
+    public double fit(Matrix[] X, Matrix[] Y) {
+        if (X.length != Y.length)
             throw new IllegalArgumentException("inputs and outputs must be of same length");
 
-        double m = inputs.length;
+        double m = X.length;
         double L = 0;
 
-        Matrix[] accumulatedDeltas = new Matrix[weights.length],
-                deltas = new Matrix[weights.length];
+        Matrix[] accumulatedWeightUpdates = new Matrix[weight.length],
+                accumulatedBiasUpdates = new Matrix[bias.length],
+                deltas = new Matrix[weight.length],
+                biasDeltas = new Matrix[bias.length];
 
         // init deltas
-        for (int i = 0; i < accumulatedDeltas.length; i++)
-            accumulatedDeltas[i] = Matrix.zeros(weights[i].rows, weights[i].cols);
+        for (int i = 0; i < accumulatedWeightUpdates.length; i++) {
+            accumulatedWeightUpdates[i] = Matrix.zeros(weight[i].rows, weight[i].cols);
+            accumulatedBiasUpdates[i] = Matrix.zeros(bias[i].rows, bias[i].cols);
+        }
 
         for (int i = 0; i < m; i++) {
             // feed forward
-            var feedForward = feedForward(inputs[i]);
+            var feedForward = feedForward(X[i]);
             Matrix[] z = feedForward.a, a = feedForward.b;
 
             // calculate last delta
             deltas[deltas.length - 1] = ArrayUtils.lastElement(a)
-                    .subtract(outputs[i]);
+                    .subtract(Y[i]);
 
             // sum up loss
             L += ArrayUtils.lastElement(deltas).l2norm();
 
+
             // calculate other deltas
             for (int j = deltas.length - 2; j >= 0; j--) {
-                deltas[j] = Matrix.dot(Matrix.transpose(weights[j]), deltas[j + 1])
-                        .multiply(z[j - 1].apply(activationFunction, true));
+                deltas[j] = Matrix.dot(Matrix.transpose(weight[j + 1]), deltas[j + 1])
+                        .multiply(z[j].apply(activationFunction, true));
             }
 
-            // add to accumulated deltas
-            for (int j = 0; j < deltas.length; j++)
-                accumulatedDeltas[j].add(deltas[j]);
+            // add to accumulated weight and bias updates
+            // delta times activation for weights
+            for (int j = 0; j < deltas.length; j++) {
+                accumulatedWeightUpdates[j].add(
+                        Matrix.dot(deltas[j], Matrix.transpose(a[j]))
+                );
+
+                accumulatedBiasUpdates[j].add(deltas[j]);
+            }
         }
 
-        // update weights
-        // multiply by 1 / m
-        // and multiply all columns but the first one with learning rate
-        // (the first one is the bias)
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] = weights[i]
-                    .subtract(accumulatedDeltas[i].multiply(1 / m).multiplyExceptColumn(learningRate, 0));
+        // update weights and biases
+        // multiply by 1 / m * learning rate
+        for (int i = 0; i < weight.length; i++) {
+            weight[i] = weight[i]
+                    .subtract(accumulatedWeightUpdates[i].multiply(learningRate / m));
+            bias[i] = bias[i]
+                    .subtract(accumulatedBiasUpdates[i].multiply(biasLearningRate / m));
         }
-
 
         // return loss (average)
         return L / m;
@@ -214,5 +230,16 @@ public class MLP2 implements Serializable {
         }
 
         return fit(input, output, batchSize, epochs);
+    }
+
+    /**
+     * print the structure of the neural network
+     */
+    public void printNetwork() {
+        for (int i = 0; i < layerStructure.length - 1; i++) {
+            System.out.println("Layer " + i);
+            System.out.println("Bias vector: \n" + bias[i]);
+            System.out.println("Weight matrix: \n" + weight[i]);
+        }
     }
 }

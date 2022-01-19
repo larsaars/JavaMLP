@@ -1,6 +1,7 @@
 package mlp.matrix;
 
 import mlp.activationfunction.ActivationFunction;
+import mlp.utils.Log;
 
 import java.io.Serializable;
 import java.util.*;
@@ -158,6 +159,22 @@ public class Matrix implements Serializable {
         return this;
     }
 
+    public Matrix dot(Matrix m) {
+        Matrix temp = Matrix.dot(this, m);
+        rows = temp.rows;
+        cols = temp.cols;
+        data = temp.data;
+        return this;
+    }
+
+    public Matrix transpose() {
+        Matrix temp = Matrix.transpose(this);
+        rows = temp.rows;
+        cols = temp.cols;
+        data = temp.data;
+        return this;
+    }
+
     public double l2norm() {
         double sum = 0;
         for (int i = 0; i < rows; i++)
@@ -227,8 +244,7 @@ public class Matrix implements Serializable {
      */
     public static Matrix dot(Matrix a, Matrix b) {
         if (a.cols != b.rows)
-            throw new ShapeMismatchException("dot shape mismatch: %s and %s\n", a.shapeString(), b.shapeString());
-
+             throw new ShapeMismatchException("dot shape mismatch: %s and %s\nmatrix 1:\n%s\nmatrix 2:\n%s", a.shapeString(), b.shapeString(), a.toString(), b.toString());
 
         Matrix temp = new Matrix(a.rows, b.cols);
         for (int i = 0; i < temp.rows; i++)
@@ -331,6 +347,17 @@ public class Matrix implements Serializable {
     }
 
     public void print() {
+        System.out.println(shapeString());
         System.out.println(this);
+    }
+
+    public static void print(Matrix[] ms) {
+        for(int i = 0; i < ms.length; i++) {
+            System.out.println(i);
+            if(ms[i] != null)
+                ms[i].print();
+            else
+                System.out.println("Matrix is null");
+        }
     }
 }

@@ -22,7 +22,7 @@ public class XOrTest2 {
     };
 
     public static void main(String[] args) {
-        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 16, 1}, ActivationFunctions.SIGMOID, 1e-3);
+        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 1}, ActivationFunctions.SIGMOID, 1e-3, 0.5);
 
         double[] loss = nn.fit(X, Y, 4, 100);
         for (double[] d : X) {
@@ -32,6 +32,7 @@ public class XOrTest2 {
 
         Log.l("Loss: " + Arrays.toString(loss));
 
+        nn.printNetwork();
         // NNUtils.save(nn, loss);
     }
 }
