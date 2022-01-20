@@ -1,6 +1,7 @@
 package mlp;
 
 import mlp.activationfunction.ActivationFunction;
+import mlp.activationfunction.ActivationFunctions;
 import mlp.matrix.ArrayUtils;
 import mlp.matrix.Matrix;
 import mlp.utils.Log;
@@ -10,7 +11,21 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-// https://www.youtube.com/watch?v=x_Eamf8MHwU
+/**
+ * Simple implementation of a Multi Layer Perceptron learning with mean squared error loss function
+ *
+ * Hyperparameters that can be edited:
+ * batch size
+ * layer structure
+ * learning rate for bias and for weights
+ * activation functions
+ *
+ * Might not work sometimes, the matrix library was implemented by myself and
+ * when using ReLU for example, there are often infinity / NaN errors occurring, since the numbers get too big.
+ *
+ * Implemented with the help of this video and my lectures on neuronal networks. Thanks to my prof BJ.
+ * https://www.youtube.com/watch?v=x_Eamf8MHwU
+ */
 public class MLP2 implements Serializable {
     /**
      * thetas, weight matrices
@@ -20,10 +35,12 @@ public class MLP2 implements Serializable {
     public Matrix[] weight, bias;
 
     /**
-     * activation function for all layers
+     * activation functions for all layers
      * g(x)
+     *
+     * the output activation function is used to activate the last layer
      */
-    public ActivationFunction activationFunction;
+    public ActivationFunction activationFunction, outputActivationFunction;
 
     /**
      * layer structure
@@ -43,11 +60,12 @@ public class MLP2 implements Serializable {
      * @param activationFunction activation function
      * @param learningRate       learning rate
      */
-    public MLP2(int[] layerStructure, ActivationFunction activationFunction, double learningRate, double biasLearningRate) {
+    public MLP2(int[] layerStructure, ActivationFunction activationFunction, ActivationFunction outputActivationFunction, double learningRate, double biasLearningRate) {
         this.learningRate = learningRate;
         this.biasLearningRate = biasLearningRate;
         this.layerStructure = layerStructure;
         this.activationFunction = activationFunction;
+        this.outputActivationFunction = outputActivationFunction;
 
         // initialize weights and biases structure
         weight = new Matrix[layerStructure.length - 1];
@@ -79,7 +97,8 @@ public class MLP2 implements Serializable {
         // the first z is Z 2
         for (int i = 0; i < z.length; i++) {
             z[i] = Matrix.dot(weight[i], a[i]).add(bias[i]);
-            a[i + 1] = Matrix.c(z[i]).apply(activationFunction, false);
+            a[i + 1] = Matrix.c(z[i])
+                    .apply(i == z.length - 1 ? outputActivationFunction : activationFunction, false);
         }
 
         return new Pair<>(z, a);
@@ -119,8 +138,11 @@ public class MLP2 implements Serializable {
         if (batchSize > inputs.length)
             throw new IllegalArgumentException("batch size cannot be greater than inputs length");
 
+        double currentLoss;
+
         List<Double> loss = new ArrayList<>();
         for (int i = 0; i < epochs; i++) {
+            // create mini batches by shuffling input
             Matrix[] batchInputs, batchOutputs;
             if (batchSize != inputs.length) {
                 ArrayUtils.shuffle(inputs, outputs);
@@ -137,7 +159,10 @@ public class MLP2 implements Serializable {
                 batchOutputs = outputs;
             }
 
-            loss.add(fit(batchInputs, batchOutputs));
+            loss.add(currentLoss = fit(batchInputs, batchOutputs));
+
+            // print the loss
+            Log.l("Epoch " + i + ": " + currentLoss);
         }
 
         return ArrayUtils.toPrimitive(loss.toArray(new Double[0]));
@@ -159,8 +184,7 @@ public class MLP2 implements Serializable {
 
         Matrix[] accumulatedWeightUpdates = new Matrix[weight.length],
                 accumulatedBiasUpdates = new Matrix[bias.length],
-                deltas = new Matrix[weight.length],
-                biasDeltas = new Matrix[bias.length];
+                deltas = new Matrix[weight.length];
 
         // init deltas
         for (int i = 0; i < accumulatedWeightUpdates.length; i++) {

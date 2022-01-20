@@ -1,6 +1,6 @@
 package test.patternrecognition;
 
-import mlp.MLP;
+import mlp.MLP2;
 import mlp.activationfunction.ActivationFunctions;
 import mlp.matrix.ArrayUtils;
 import mlp.utils.NNUtils;
@@ -42,12 +42,13 @@ public class PatternRecognitionTestTrain {
                 Y = ArrayUtils.fromList(Y_list);
 
         // create the nn instance
-       MLP nn = new MLP(new int[]{784, 70, 70, 70, 62}, 1e-3, ActivationFunctions.HYPERBOLIC_TANGENT);
+       MLP2 nn = new MLP2(new int[]{784, 70, 70, 70, 62}, ActivationFunctions.SIGMOID, ActivationFunctions.IDENTITY, 1e-3, 0.5);
         // fit data and save loss and model
         double[] loss = nn.fit(
                 X,
                 Y,
-                5000000
+                100,
+               600
         );
 
         l("saving nn and loss");

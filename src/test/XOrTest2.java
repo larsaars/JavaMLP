@@ -1,11 +1,8 @@
 package test;
 
-import mlp.MLP;
 import mlp.MLP2;
+import mlp.activationfunction.ActivationFunction;
 import mlp.activationfunction.ActivationFunctions;
-import mlp.matrix.ArrayUtils;
-import mlp.utils.Log;
-import mlp.utils.NNUtils;
 
 import java.util.Arrays;
 
@@ -22,9 +19,9 @@ public class XOrTest2 {
     };
 
     public static void main(String[] args) {
-        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 1}, ActivationFunctions.LEAKY_RELU, 1e-3, 0.5);
+        MLP2 nn = new MLP2(new int[]{2, 16, 16, 16, 16, 1}, ActivationFunctions.LEAKY_RELU, ActivationFunctions.SIGMOID, 1e-3, 0.5);
 
-        double[] loss = nn.fit(X, Y, 1, 100000);
+        double[] loss = nn.fit(X, Y, 1, 10000);
         for (double[] d : X) {
             double[] output = nn.feedForward(d);
             System.out.println("Output: " + Arrays.toString(output));

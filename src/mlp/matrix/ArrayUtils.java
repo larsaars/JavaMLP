@@ -70,6 +70,7 @@ public class ArrayUtils {
      * shuffle multiple arrays in the same manner
      * https://stackoverflow.com/a/19333201/5899585
      */
+    @SafeVarargs
     public static <T> void shuffle(T[]... arrays) {
         int countOfArrays = arrays[0].length;
         for (int i = 1; i < arrays.length ; i++) {

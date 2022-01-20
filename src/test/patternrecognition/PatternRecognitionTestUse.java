@@ -1,6 +1,6 @@
 package test.patternrecognition;
 
-import mlp.MLP;
+import mlp.MLP2;
 import mlp.matrix.ArrayUtils;
 import mlp.utils.Log;
 import mlp.utils.NNUtils;
@@ -23,14 +23,14 @@ public class PatternRecognitionTestUse {
 
     public static void main(String[] args) {
         // load network
-        MLP nn = NNUtils.load();
+        MLP2 nn = NNUtils.load();
 
         nn.printNetwork();
 
         // load image and classify
         for (File testFile : Objects.requireNonNull(new File("img/test").listFiles())) {
             double[] image = PatternRecognitionTestTrain.loadImage(testFile.getPath(), 28, 28, false);
-            double[] output = nn.predict(image);
+            double[] output = nn.feedForward(image);
 
             Log.l(testFile.getName() + ": " + PATTERNS[ArrayUtils.argMax(output)]);
         }
