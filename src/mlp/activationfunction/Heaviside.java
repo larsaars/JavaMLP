@@ -1,6 +1,6 @@
 package mlp.activationfunction;
 
-public class Boolean implements ActivationFunction {
+public class Heaviside implements ActivationFunction {
 
     @Override
     public double activate(double input) {

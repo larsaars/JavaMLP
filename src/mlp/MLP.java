@@ -180,12 +180,12 @@ public class MLP implements Serializable {
         double loss = errorBefore.r2error();
 
         for (int i = layers.length - 2; i >= 0; i--) {
-            Matrix error = i == layers.length - 2 ? errorBefore : Matrix.dot(inputWeightsBefore, errorBefore);
+            Matrix error = i == layers.length - 2 ? errorBefore : Matrix.dot(inputWeightsBefore, errorBefore); // z
 
             Matrix gradient = Matrix.c(feedforward[i + 1])
                     .apply(activationFunction, true)
                     .multiply(error)
-                    .multiply(learningRate);
+                    .multiply(learningRate); // w * g'(z)
 
             Matrix l_T = Matrix.transpose(feedforward[i]);
             Matrix l_delta = Matrix.dot(gradient, l_T);
